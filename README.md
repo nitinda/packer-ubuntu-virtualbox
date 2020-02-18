@@ -37,7 +37,7 @@ _The following software must be installed/present on your local machine before y
 
 _Make sure all the required software (listed above) is installed, then cd to the directory containing this README.md file, and run:_
 
-    $ ubuntu-18.04.3-packer-build.sh <VagrantCloud User/login> <VagrantCloud Password>
+    _$ ubuntu-18.04.3-packer-build.sh <VagrantCloud User/login> <VagrantCloud Password>_
 
 _After a few minutes, Packer should tell you the box was generated successfully, and the box was uploaded to Vagrant Cloud._
 
