@@ -29,7 +29,7 @@ _The following software must be installed/present on your local machine before y
 
   - [_Packer_](http://www.packer.io/)
   - [_Vagrant_](http://vagrantup.com/)
-  - [_VirtualBox_](https://www.virtualbox.org/) (if you want to build the VirtualBox box)
+  - [_VirtualBox_](https://www.virtualbox.org/) _(if you want to build the VirtualBox box)_
 
 ---
 
