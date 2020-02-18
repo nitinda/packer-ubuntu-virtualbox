@@ -1,5 +1,9 @@
 # #!/bin/sh -eux
 
+## Clean Up
+apt-get --assume-yes clean
+apt-get --assume-yes autoremove
+
 # # # Delete all Linux headers
 # # dpkg --list \
 # #   | awk '{ print $2 }' \

@@ -1,5 +1,7 @@
 #!/bin/bash -eux
 
+echo "Configure User Vagant ............. Starting $(date)"
+
 pubkey_url="https://raw.githubusercontent.com/mitchellh/vagrant/master/keys/vagrant.pub";
 mkdir -p $HOME/.ssh;
 if command -v wget >/dev/null 2>&1; then
@@ -12,3 +14,5 @@ else
 fi
 chown -R vagrant $HOME/.ssh;
 chmod -R go-rwsx $HOME/.ssh;
+
+echo "Configure User Vagant ............. End $(date)"
