@@ -89,6 +89,7 @@
             "virtualbox-iso": {
                 "scripts": [
                     "scripts/base-ubuntu-18.04.04.sh",
+                    "scripts/cleanup.sh",
                     "scripts/sudoers.sh",
                     "scripts/update.sh",
                     "scripts/vagrant.sh"
