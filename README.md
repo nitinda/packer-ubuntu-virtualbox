@@ -1,4 +1,4 @@
-# _Packer - Ubuntu 18.04 Vagrant Box With Desktop_
+# _Packer - Ubuntu Virual Box With Desktop_
 
 <!--BEGIN STABILITY BANNER-->
 ---
@@ -7,19 +7,17 @@
 
 > **_This is a stable example. It should successfully build out of the box_**
 >
-> _This examples does is built on Construct Libraries marked "Stable" and does not have any infrastructure prerequisites to build._
-
 ---
 <!--END STABILITY BANNER-->
 
-_This example creates a **Ubuntu Virtual Box : 18.04**._
+_This example creates a **_Ubuntu Virtual Box_**._
 
 
 **_Pre-built Vagrant Box_**:
 
   - [`vagrant init nitindas/ubuntu-18`](https://app.vagrantup.com/nitindas/boxes/ubuntu-18)
 
-_This example build configuration installs and configures ubuntu 18.04 amd64._
+_This example build configuration installs and configures ubuntu desktop amd64._
 
 ---
 
@@ -38,6 +36,8 @@ _The following software must be installed/present on your local machine before y
 _Make sure all the required software (listed above) is installed, then cd to the directory containing this README.md file, and run:_
 
     _$ ubuntu-18.04.3-packer-build.sh <VagrantCloud User/login> <VagrantCloud Password>_
+    _$ ubuntu-18.04.04-packer-build.sh <VagrantCloud User/login> <VagrantCloud Password>_
+    _$ ubuntu-packer-build.sh 20.04 <VagrantCloud User/login> <VagrantCloud Password>_
 
 _After a few minutes, Packer should tell you the box was generated successfully, and the box was uploaded to Vagrant Cloud._
 
