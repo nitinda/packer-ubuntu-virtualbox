@@ -36,11 +36,13 @@ _The following software must be installed/present on your local machine before y
 _Make sure all the required software (listed above) is installed, then cd to the directory containing this README.md file, and run:_
 
 * **_Ubuntu 18_**
+
     _$ cd ubuntu-18_
     _$ ubuntu-packer-build.sh 18.03 or 18.04 <VagrantCloud User/login> <VagrantCloud Password>_
 
 
 * **_Ubuntu 20_**
+
     _$ cd ubuntu-20_
     _$ ubuntu-packer-build.sh <VagrantCloud User/login> <VagrantCloud Password>_
 
