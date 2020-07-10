@@ -35,9 +35,15 @@ _The following software must be installed/present on your local machine before y
 
 _Make sure all the required software (listed above) is installed, then cd to the directory containing this README.md file, and run:_
 
-    _$ ubuntu-18.04.3-packer-build.sh <VagrantCloud User/login> <VagrantCloud Password>_
-    _$ ubuntu-18.04.04-packer-build.sh <VagrantCloud User/login> <VagrantCloud Password>_
-    _$ ubuntu-packer-build.sh 20.04 <VagrantCloud User/login> <VagrantCloud Password>_
+* **_Ubuntu 18_**
+    _$ cd ubuntu-18_
+    _$ ubuntu-packer-build.sh 18.03 or 18.04 <VagrantCloud User/login> <VagrantCloud Password>_
+
+
+* **_Ubuntu 20_**
+    _$ cd ubuntu-20_
+    _$ ubuntu-packer-build.sh <VagrantCloud User/login> <VagrantCloud Password>_
+
 
 _After a few minutes, Packer should tell you the box was generated successfully, and the box was uploaded to Vagrant Cloud._
 
@@ -47,8 +53,8 @@ _> **Note**: This configuration includes a post-processor that pushes the built 
 
 _There's an included Vagrantfile that allows quick testing of the built Vagrant boxes. From VagrantFile-Example/ directory, run one the following command after building the box:_
 
-    $ cd VagrantFile-Example/
-    $ vagrant up
+    _$ cd VagrantFile-Example/_
+    _$ vagrant up_
 
 ---
 

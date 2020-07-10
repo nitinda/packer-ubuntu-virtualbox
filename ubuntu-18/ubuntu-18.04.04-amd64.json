@@ -1,0 +1,120 @@
+{
+    "variables": {
+        "file": "http://cdimage.ubuntu.com/ubuntu/releases/bionic/release/ubuntu-18.04.4-server-amd64.iso",
+        "checksum": "e2ecdace33c939527cbc9e8d23576381c493b071107207d2040af72595f8990b",
+        "type": "sha256",
+        "non_gui": "false",
+        "vboxversion": "04.04",
+        "osdetails": "ubuntu-18.04.04-amd64",
+        "version": "{{ timestamp }}",
+        "vagrantcloud_token": "{{env `VAGRANT_CLOUD_TOKEN`}}",
+        "version_desc": "Latest kernel build of Ubuntu Vagrant images based on Ubuntu 18.04.3 (With Desktop)"
+    },
+    "builders": [{
+        "type": "virtualbox-iso",
+        "iso_url": "{{ user `file` }}",
+        "iso_checksum": "{{ user `checksum` }}",
+        "iso_checksum_type": "{{ user `type` }}",
+        "headless": "{{ user `non_gui` }}",
+        "output_directory": "c:/vagrant-box",
+        "vm_name": "ubuntu-18.04.04.{{ user `vboxversion` }}-amd64-to-vagrant",
+        "guest_os_type": "Ubuntu_64",
+        "disk_size": "30720",
+        "vboxmanage": [
+            [
+                "modifyvm",
+                "{{.Name}}",
+                "--memory",
+                "4096"
+            ],
+            [
+                "modifyvm",
+                "{{.Name}}",
+                "--cpus",
+                "2"
+            ],
+            [
+                "modifyvm",
+                "{{.Name}}",
+                "--audio",
+                "none"
+            ],
+            [
+                "modifyvm",
+                "{{.Name}}",
+                "--usb",
+                "off"
+            ]
+        ],
+        "http_directory": "http",
+        "boot_wait": "10s",
+        "boot_command": [
+            "<esc><wait>",
+            "<esc><wait>",
+            "<enter><wait>",
+            "/install/vmlinuz<wait>",
+            " auto<wait>",
+            " console-setup/ask_detect=false<wait>",
+            " console-setup/layoutcode=gb<wait>",
+            " console-setup/modelcode=pc105<wait>",
+            " debconf/frontend=noninteractive<wait>",
+            " debian-installer=en_GB.UTF-8<wait>",
+            " fb=false<wait>",
+            " initrd=/install/initrd.gz<wait>",
+            " kbd-chooser/method=gb<wait>",
+            " keyboard-configuration/layout=GB<wait>",
+            " keyboard-configuration/variant=GB<wait>",
+            " locale=en_GB.UTF-8<wait>",
+            " netcfg/get_domain=vm<wait>",
+            " netcfg/get_hostname=ubuntu-vagrant<wait>",
+            " grub-installer/bootdev=/dev/sda<wait>",
+            " noapic<wait>",
+            " preseed/url=http://{{ .HTTPIP }}:{{ .HTTPPort }}/preseed-18.04.04.cfg<wait>",
+            " -- <wait>",
+            "<enter><wait>"
+        ],
+        "ssh_username": "vagrant",
+        "ssh_password": "vagrant",
+        "ssh_port": 22,
+        "ssh_wait_timeout": "6000s",
+        "guest_additions_path": "VBoxGuestAdditions_{{.Version}}.iso",
+        "virtualbox_version_file": ".vbox_version",
+        "shutdown_command": "echo 'vagrant' | sudo -S shutdown -P now"
+    }],
+    "provisioners": [{
+        "type": "shell",
+        "execute_command": "echo 'vagrant'|sudo -S sh '{{.Path}}'",
+        "expect_disconnect": true,
+        "override": {
+            "virtualbox-iso": {
+                "scripts": [
+                    "scripts/base-ubuntu-18.04.04.sh",
+                    "scripts/cleanup.sh",
+                    "scripts/sudoers.sh",
+                    "scripts/update.sh",
+                    "scripts/vagrant.sh"
+                ]
+            }
+        }
+    }],
+    "post-processors": [
+        [{
+                "type": "vagrant",
+                "keep_input_artifact": false,
+                "compression_level": 9,
+                "override": {
+                    "virtualbox": {
+                        "output": "target-ubuntu-18.04.04/{{ user `osdetails` }}.box"
+                    }
+                }
+            },
+            {
+                "type": "vagrant-cloud",
+                "box_tag": "nitindas/ubuntu-18",
+                "version": "{{ user `vboxversion` }}-{{user `version`}}",
+                "version_description": "{{ user `version_desc` }}",
+                "access_token": "{{user `vagrantcloud_token`}}"
+            }
+        ]
+    ]
+}

@@ -1,0 +1,23 @@
+#cloud-config
+autoinstall:
+  version: 1
+  locale: en_GB
+  keyboard:
+    layout: en
+    variant: uk
+  identity:
+    hostname: ubuntu-server
+    password: '$6$xzsJvkg10l$/MR33d6N0hKXj23Mlb7xustF5i2TzA1iQt9gErJysQxnANBHUyeUdyc.paED1gB0tIx5XPG2Zic4BLygr1Z2a/'
+    username: vagrant
+  storage:
+    layout:
+      name: lvm
+  ssh:
+    install-server: true
+    allow-pw: true
+  user-data:
+    disable_root: false
+  late-commands:
+    - "echo 'Defaults:vagrant !requiretty' > /target/etc/sudoers.d/vagrant"
+    - "echo 'vagrant ALL=(ALL) NOPASSWD: ALL' >> /target/etc/sudoers.d/vagrant"
+    - "chmod 440 /target/etc/sudoers.d/vagrant"

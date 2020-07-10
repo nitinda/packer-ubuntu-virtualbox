@@ -1,0 +1,80 @@
+{
+  "variables": {
+    "file": "http://releases.ubuntu.com/20.04/ubuntu-20.04-live-server-amd64.iso",
+    "checksum": "sha256:caf3fd69c77c439f162e2ba6040e9c320c4ff0d69aad1340a514319a9264df9f",
+    "non_gui": "false",
+    "vboxversion": "20.04",
+    "osdetails": "ubuntu-{{ user `vboxversion` }}-amd64",
+    "version": "{{ timestamp }}",
+    "box_tag": "nitindas/ubuntu-20",
+    "vagrantcloud_token": "{{env `VAGRANT_CLOUD_TOKEN`}}",
+    "version_desc": "Latest kernel build of Ubuntu Vagrant images based on Ubuntu Server {{ user `vboxversion` }} LTS (Focal Fossa) With Desktop"
+  },
+  "builders": [
+    {
+      "name": "ubuntu-{{ user `vboxversion` }}-virtual-box",
+      "type": "virtualbox-iso",
+      "guest_os_type": "Ubuntu_64",
+      "headless": "{{ user `non_gui` }}",
+      "iso_url": "{{ user `file` }}",
+      "iso_checksum": "{{ user `checksum` }}",
+      "ssh_username": "vagrant",
+      "ssh_password": "vagrant",
+      "ssh_handshake_attempts": "100",
+      "ssh_timeout": "20m",
+      "ssh_wait_timeout": "6000s",
+      "ssh_keep_alive_interval": "10s",
+      "http_directory": "subiquity/http",
+      "disk_size": "30720",
+      "output_directory": "c:/vagrant-box",
+      "boot_wait": "5s",
+      "boot_command": [
+        "<enter><enter><f6><esc><wait> ",
+        "autoinstall ds=nocloud-net;s=http://{{ .HTTPIP }}:{{ .HTTPPort }}/",
+        "<enter>"
+      ],
+      "shutdown_command": "echo 'vagrant'|sudo -S shutdown -P now",
+      "guest_additions_path": "VBoxGuestAdditions_{{.Version}}.iso",
+      "virtualbox_version_file": ".vbox_version",
+      "vm_name": "ubuntu-{{ user `vboxversion` }}-amd64-to-vagrant",
+      "vboxmanage": [
+        ["modifyvm", "{{.Name}}", "--memory", "4096"],
+        ["modifyvm", "{{.Name}}", "--cpus", "2"],
+        ["modifyvm", "{{.Name}}", "--audio", "none"]
+      ]
+    }
+  ],
+  "provisioners": [
+    {
+      "type": "shell",
+      "execute_command": "echo 'vagrant' | {{.Vars}} sudo -S -E bash '{{.Path}}'",
+      "expect_disconnect": true,
+      "scripts": [
+        "scripts/init.sh",
+        "scripts/cleanup.sh",
+        "scripts/vagrant.sh"
+      ]
+    }
+  ],
+  "post-processors": [
+    [
+      {
+        "type": "vagrant",
+        "keep_input_artifact": false,
+        "compression_level": 9,
+        "override": {
+          "virtualbox": {
+            "output": "target/{{ user `osdetails` }}.box"
+          }
+        }
+      },
+      {
+        "type": "vagrant-cloud",
+        "box_tag": "{{user `box_tag`}}",
+        "version": "{{ user `vboxversion` }}-{{user `version`}}",
+        "version_description": "{{ user `version_desc` }}",
+        "access_token": "{{user `vagrantcloud_token`}}"
+      }
+    ]
+  ]
+}
