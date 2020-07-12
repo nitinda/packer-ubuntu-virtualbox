@@ -3,47 +3,49 @@ autoinstall:
   version: 1
   locale: en_GB
   keyboard:
-    layout: en
+    layout: gb
     variant: uk
   identity:
     hostname: ubuntu-server
     password: "$6$xzsJvkg10l$/MR33d6N0hKXj23Mlb7xustF5i2TzA1iQt9gErJysQxnANBHUyeUdyc.paED1gB0tIx5XPG2Zic4BLygr1Z2a/"
     username: vagrant
-    storage:
-      version: 1
-      config:
-        - grub_device: true
-          id: disk-sda
-          name: ""
-          path: /dev/sda
-          preserve: false
-          ptable: gpt
-          type: disk
-          wipe: superblock-recursive
-        - device: disk-sda
-          flag: bios_grub
-          id: partition-4
-          size: 1048576
-          number: 1
-          preserve: false
-          type: partition
-        - device: disk-sda
-          flag: ""
-          id: partition-5
-          number: 2
-          preserve: false
-          size: 32209108992
-          type: partition
-          wipe: superblock
-        - fstype: ext4
-          id: format-2
-          preserve: false
-          type: format
-          volume: partition-5
-        - device: format-2
-          id: mount-2
-          path: /
-          type: mount
+  storage:
+    version: 1
+    config:
+      - grub_device: true
+        id: disk-sda
+        name: ''
+        path: /dev/sda
+        preserve: false
+        ptable: gpt
+        type: disk
+        wipe: superblock-recursive
+      - device: disk-sda
+        flag: bios_grub
+        id: partition-4
+        size: 1048576
+        number: 1
+        preserve: false
+        type: partition
+      - device: disk-sda
+        flag: ''
+        id: partition-5
+        number: 2
+        preserve: false
+        size: 32209108992
+        type: partition
+        wipe: superblock
+      - fstype: ext4
+        id: format-2
+        preserve: false
+        type: format
+        volume: partition-5
+      - device: format-2
+        id: mount-2
+        path: /
+        type: mount
+  packages:
+    - ubuntu-desktop-minimal
   ssh:
     install-server: true
     allow-pw: true

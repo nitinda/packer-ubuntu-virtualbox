@@ -12,7 +12,7 @@
   },
   "builders": [
     {
-      "name": "ubuntu-{{ user `vboxversion` }}-virtual-box",
+      "name": "packer-vagrant-ubuntu-{{ user `vboxversion` }}-virtual-box",
       "type": "virtualbox-iso",
       "guest_os_type": "Ubuntu_64",
       "headless": "{{ user `non_gui` }}",
@@ -21,11 +21,11 @@
       "ssh_username": "vagrant",
       "ssh_password": "vagrant",
       "ssh_handshake_attempts": "100",
-      "ssh_timeout": "20m",
+      "ssh_timeout": "90m",
       "ssh_wait_timeout": "6000s",
-      "ssh_keep_alive_interval": "10s",
+      "ssh_keep_alive_interval": "30s",
       "http_directory": "subiquity/http",
-      "disk_size": "30720",
+      "memory": 1024,
       "output_directory": "c:/vagrant-box",
       "boot_wait": "5s",
       "boot_command": [
@@ -36,11 +36,10 @@
       "shutdown_command": "echo 'vagrant'|sudo -S shutdown -P now",
       "guest_additions_path": "VBoxGuestAdditions_{{.Version}}.iso",
       "virtualbox_version_file": ".vbox_version",
-      "vm_name": "ubuntu-{{ user `vboxversion` }}-amd64-to-vagrant",
+      "vm_name": "packer-vagrant-ubuntu-{{ user `vboxversion` }}-amd64",
       "vboxmanage": [
         ["modifyvm", "{{.Name}}", "--memory", "4096"],
-        ["modifyvm", "{{.Name}}", "--cpus", "2"],
-        ["modifyvm", "{{.Name}}", "--audio", "none"]
+        ["modifyvm", "{{.Name}}", "--cpus", "2"]
       ]
     }
   ],
@@ -49,11 +48,7 @@
       "type": "shell",
       "execute_command": "echo 'vagrant' | {{.Vars}} sudo -S -E bash '{{.Path}}'",
       "expect_disconnect": true,
-      "scripts": [
-        "scripts/init.sh",
-        "scripts/cleanup.sh",
-        "scripts/vagrant.sh"
-      ]
+      "scripts": ["scripts/init.sh", "scripts/cleanup.sh", "scripts/vagrant.sh"]
     }
   ],
   "post-processors": [
