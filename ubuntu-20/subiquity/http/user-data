@@ -4,7 +4,6 @@ autoinstall:
   locale: en_GB
   keyboard:
     layout: gb
-    variant: uk
   identity:
     hostname: ubuntu-server
     password: "$6$xzsJvkg10l$/MR33d6N0hKXj23Mlb7xustF5i2TzA1iQt9gErJysQxnANBHUyeUdyc.paED1gB0tIx5XPG2Zic4BLygr1Z2a/"
