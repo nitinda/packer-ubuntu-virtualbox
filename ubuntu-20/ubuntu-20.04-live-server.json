@@ -48,7 +48,11 @@
       "type": "shell",
       "execute_command": "echo 'vagrant' | {{.Vars}} sudo -S -E bash '{{.Path}}'",
       "expect_disconnect": true,
-      "scripts": ["scripts/init.sh", "scripts/cleanup.sh", "scripts/vagrant.sh"]
+      "scripts": [
+        "scripts/init.sh",
+        "scripts/cleanup.sh",
+        "scripts/vagrant.sh"
+      ]
     }
   ],
   "post-processors": [
