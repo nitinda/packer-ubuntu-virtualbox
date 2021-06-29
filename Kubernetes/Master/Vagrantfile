@@ -1,0 +1,128 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+
+Vagrant.require_version ">= 2.2.6"
+
+Vagrant.configure("2") do |config|
+  config.vm.box              = "nitindas/ubuntu-minimal-18"
+  config.vm.box_version      = "18.04.5-server-amd64-1599859922"
+  config.vm.box_check_update = true
+  config.vm.boot_timeout     = 120
+  config.ssh.connect_timeout = 2
+
+  config.vm.network "private_network", ip: "192.168.127.3",
+    auto_config: false
+  
+  # config.vm.network "forwarded_port", guest: 22, guest_ip: "192.168.56.101", host: 2222, host_ip: "127.0.0.1",
+  #   auto_correct: true
+   
+  config.vm.provider "virtualbox" do |v|
+    # Customize Name of VM:
+    v.name = "kube-master-ubuntu"
+
+    # Display the VirtualBox GUI when booting the machine
+    v.gui = true
+
+    # Customize the amount of memory on the VM:
+    v.memory = "3072"
+
+    # Customize the amount of cpu on the VM:
+    v.cpus = 2
+
+    ## /c/Program\ Files/Oracle/VirtualBox/VBoxManage natnetwork add --netname natnet1 --network "192.168.22.0/24" --enable
+    # v.customize ["modifyvm", :id, "--nat-network1", "natnet1"]
+    # v.customize ["modifyvm", :id, "--nic1", "natnetwork"]
+    
+
+    v.customize ["modifyvm", :id, "--graphicscontroller", "vboxsvga"]
+    v.customize ["modifyvm", :id, "--accelerate3d", "off"]
+
+    # Customize video memory
+    v.customize ["modifyvm", :id, "--vram", "128"]
+
+    # Shared Clipboard
+    v.customize ['modifyvm', :id, '--clipboard-mode', 'bidirectional']
+
+    # Enable Drag and Drop
+    v.customize ["modifyvm", :id, "--draganddrop", "bidirectional"]
+
+    # Enable Remote Display
+    v.customize ["modifyvm", :id, "--vrde", "on"]
+    v.customize ["modifyvm", :id, "--vrdeport", "5000,5010-5012"]
+  end
+
+
+  ## »File Provisioner
+  config.vm.provision "file", source: "01-netcfg-new.yaml", destination: "$HOME/01-netcfg.yaml"
+
+  ## »Shell Provisioner
+  config.vm.provision "shell", inline: <<-SHELL
+
+  echo I am provisioning...
+  ls -lrt /etc/netplan/01-netcfg*
+  sudo cp -p /etc/netplan/01-netcfg.yaml /etc/netplan/01-netcfg.yaml-orig
+  sudo ls -lrt /etc/netplan/01-netcfg*
+  sudo cp /home/vagrant/01-netcfg.yaml /etc/netplan/01-netcfg.yaml
+  sudo netplan apply
+
+  # Update
+  # sudo apt-get --assume-yes update
+  # sudo apt-get --assume-yes upgrade
+  # sudo apt --assume-yes update
+  # sudo apt --assume-yes upgrade
+
+  # # Install Docker
+  # sudo apt-get install ca-certificates curl software-properties-common
+  # curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add
+  # sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu  $(lsb_release -cs)  stable" 
+  # sudo apt-get update -y
+  # sudo apt-get install -y docker-ce
+
+  # ## sudo apt-get install -y xorg-dev
+
+  # ## Swap off
+  # sudo hostnamectl set-hostname kube-master
+  # sudo swapoff -a
+  # sudo sed -i '/ swap / s/^\(.*\)$/#\1/g' /etc/fstab
+  # sudo echo "vm.swappiness=0" | sudo tee --append /etc/sysctl.conf
+  # sudo sysctl -p
+
+  # ## Install and Set Up kubectl
+  # sudo apt-get update && sudo apt-get install -y apt-transport-https gnupg2
+  # curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add -
+  # echo "deb https://apt.kubernetes.io/ kubernetes-xenial main" | sudo tee -a /etc/apt/sources.list.d/kubernetes.list
+  # sudo apt-get update -y
+  # sudo apt-get install -y kubelet kubeadm kubectl
+
+  # sudo sed -i '/Environment=”cgroup-driver=systemd/cgroup-driver=cgroupfs”/a EnvironmentFile=.*' /etc/systemd/system/kubelet.service.d/10-kubeadm.conf
+  # sudo grep Environment /etc/systemd/system/kubelet.service.d/10-kubeadm.conf
+  # sudo kubeadm init --apiserver-advertise-address=10.0.1.1 --pod-network-cidr=10.244.0.0/16
+  # # # Install keepalived.
+  # # sudo apt-get install -y keepalived
+  # # sudo systemctl enable keepalived
+  # # sudo systemctl start keepalived
+  # # sudo sysctl net.bridge.bridge-nf-call-iptables
+  # # sudo sysctl net.bridge.bridge-nf-call-iptables=1
+
+  # # Add local user
+  # sudo groupadd nitindas
+  # sudo useradd -m -g nitindas -G sudo,docker -c notdefined -p $(openssl passwd -1 nitindas) --shell /bin/bash nitindas
+
+  # # Enable kubectl autocompletion
+  # echo "source <(kubectl completion bash)" >> /home/vagrant/.bashrc
+  # sudo sh -c 'kubectl completion bash >/etc/bash_completion.d/kubectl'
+
+  ## Clean Up
+  sudo apt-get --assume-yes clean
+  sudo apt-get --assume-yes autoremove
+  
+  SHELL
+
+  # Running Provisioners Always
+  config.vm.provision "shell", run: "always", inline: <<-SHELL
+  sudo apt-get --assume-yes clean
+  sudo apt-get --assume-yes autoremove
+
+  SHELL
+end
