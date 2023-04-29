@@ -1,56 +1,110 @@
 #cloud-config
 autoinstall:
-  version: 1
-  locale: en_GB
+
+  refresh-installer:
+    update: yes
+    # channel: edge
+
+  apt:
+    preserve_sources_list: false  
+    # disable_components: []
+    mirror-selection:
+      primary:
+        - country-mirror
+        - arches: [i386, amd64]
+          uri: http://gb.archive.ubuntu.com/ubuntu
+          # uri: "http://archive.ubuntu.com/ubuntu"
+        # - arches: [s390x, arm64, armhf, powerpc, ppc64el, riscv64]
+        #   uri: "http://ports.ubuntu.com/ubuntu-ports"
+    fallback: abort
+    geoip: true
+
+  codes:
+    install: false
+
+  drivers:
+    install: false
+
+  identity:
+    hostname: ubuntu-virtual-box
+    password: $6$xzsJvkg10l$/MR33d6N0hKXj23Mlb7xustF5i2TzA1iQt9gErJysQxnANBHUyeUdyc.paED1gB0tIx5XPG2Zic4BLygr1Z2a/
+    username: vagrant
+    realname: vagrant
+
   keyboard:
     layout: gb
-  identity:
-    hostname: ubuntu-server
-    password: "$6$xzsJvkg10l$/MR33d6N0hKXj23Mlb7xustF5i2TzA1iQt9gErJysQxnANBHUyeUdyc.paED1gB0tIx5XPG2Zic4BLygr1Z2a/"
-    username: vagrant
-  storage:
-    version: 1
-    config:
-      - grub_device: true
-        id: disk-sda
-        name: ''
-        path: /dev/sda
-        preserve: false
-        ptable: gpt
-        type: disk
-        wipe: superblock-recursive
-      - device: disk-sda
-        flag: bios_grub
-        id: partition-4
-        size: 1048576
-        number: 1
-        preserve: false
-        type: partition
-      - device: disk-sda
-        flag: ''
-        id: partition-5
-        number: 2
-        preserve: false
-        size: 32209108992
-        type: partition
-        wipe: superblock
-      - fstype: ext4
-        id: format-2
-        preserve: false
-        type: format
-        volume: partition-5
-      - device: format-2
-        id: mount-2
-        path: /
-        type: mount
-  packages:
-    - ubuntu-desktop-minimal
+    toggle: null
+    variant: ''
+
+  locale: en_GB.UTF-8
+
+  # network:
+  #   network:
+  #     version: 2
+  #     ethernets:
+  #       eth0:
+  #         dhcp4: yes
+  # source:
+  #   id: synthesized
+  #   search_drivers: false
+
+  timezone: Europe/London
+
   ssh:
     install-server: true
     allow-pw: true
+    authoriized-keys: []
+
+  storage:
+    swap:
+      size: 0
+    config:
+      - { type: disk, id: disk-0, ptable: gpt, wipe: superblock-recursive, grub_device: true }
+      - { type: partition, id: partition-0, number: 1, device: disk-0, size: 1M, wipe: superblock, flag: bios_grub }
+      - { type: partition, id: partition-1, number: 2, device: disk-0, size: 512M, wipe: superblock, flag: boot }
+      - { type: partition, id: partition-2, number: 3, device: disk-0, size: 8192M, wipe: superblock, flag: swap }
+      - { type: partition, id: partition-3, number: 4, device: disk-0, size: -1, wipe: superblock }
+      - { type: format, id: format-0, volume: partition-1, fstype: ext4 }
+      - { type: format, id: format-1, volume: partition-2, fstype: swap }
+      - { type: format, id: format-2, volume: partition-3, fstype: ext4 }
+      - { type: mount, id: mount-0, device: format-0, path: /boot }
+      - { type: mount, id: mount-1, device: format-1, path: none }
+      - { type: mount, id: mount-2, device: format-2, path: / }
+
+  # storage:
+  #   config:
+  #     - {type: disk, ptable: gpt, path: /dev/vdb, wipe: superblock, preserve: false, grub_device: true, id: disk-1}
+  #     - {type: disk, ptable: gpt, path: /dev/vdc, wipe: superblock, preserve: false, grub_device: true, id: disk-2}
+  #     - {type: partition, device: disk-1, size: 1M, wipe: superblock, flag: bios_grub, number: 1, preserve: false, id: partition-grub-1}
+  #     - {type: partition, device: disk-2, size: 1M, wipe: superblock, flag: bios_grub, number: 1, preserve: false, id: partition-grub-2}
+  #     - {type: partition, device: disk-1, size: 1G, wipe: superblock, number: 2, preserve: false, id: partition-boot-1}
+  #     - {type: partition, device: disk-2, size: 1G, wipe: superblock, number: 2, preserve: false, id: partition-boot-2}
+  #     - {type: partition, device: disk-1, size: 17%, wipe: superblock, number: 3, preserve: false, id: partition-system-1}
+  #     - {type: partition, device: disk-2, size: 17%, wipe: superblock, number: 3, preserve: false, id: partition-system-2}
+  #     - {type: raid, name: md0, raidlevel: raid1, devices: [partition-boot-1, partition-boot-2], preserve: false, id: raid-boot}
+  #     - {type: raid, name: md1, raidlevel: raid1, devices: [partition-system-1, partition-system-2], preserve: false, id: raid-system}
+  #     - {type: format, fstype: ext4, volume: raid-boot, preserve: false, id: format-boot}
+  #     - {type: format, fstype: ext4, volume: raid-system, preserve: false, id: format-system}
+  #     - {type: mount, device: format-system, path: /, id: mount-system}
+  #     - {type: mount, device: format-boot, path: /boot, id: mount-boot, options: 'errors=remount-ro'}
+
+  version: 1
+
+  updates: security
+
+  # packages:
+  #   - ubuntu-desktop-minimal
+
   user-data:
     disable_root: false
-  late-commands:
-    - "echo 'Defaults:vagrant !requiretty' > /target/etc/sudoers.d/vagrant"
-    - "echo 'vagrant ALL=(ALL) NOPASSWD: ALL' >> /target/etc/sudoers.d/vagrant"
-    - "chmod 440 /target/etc/sudoers.d/vagrant"
+    growpart:
+      mode: 'off'
+    locale: en_DB.UTF-8
+    resize_rootfs: false
+    ssh_pwauth: true
+    users:
+      - gecos: vagrant
+        groups: adm,cdrom,dip,lxd,plugdev,sudo
+        name: vagrant
+        shell: /bin/bash
+        passwd: $6$xzsJvkg10l$/MR33d6N0hKXj23Mlb7xustF5i2TzA1iQt9gErJysQxnANBHUyeUdyc.paED1gB0tIx5XPG2Zic4BLygr1Z2a/
