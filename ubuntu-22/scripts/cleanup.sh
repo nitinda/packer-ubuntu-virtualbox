@@ -32,28 +32,20 @@ dpkg --list \
     | grep -- '-dev\(:[a-z0-9]\+\)\?$' \
     | xargs apt-get -y purge;
 
-echo "==> Removing linux source"
-dpkg --list | awk '{print $2}' | grep linux-source | xargs apt-get -y purge
-
-echo "==> Removing documentation"
+echo "remove docs packages"
 dpkg --list \
     | awk '{ print $2 }' \
     | grep -- '-doc$' \
     | xargs apt-get -y purge;
 
-echo "==> Removing X11 libraries"
-apt-get -y purge libx11-data xauth libxmuu1 libxcb1 libx11-6 libxext6 libxau6 libxdmcp6
+echo "remove X11 libraries"
+apt-get -y purge libx11-data xauth libxmuu1 libxcb1 libx11-6 libxext6;
 
 echo "remove obsolete networking packages"
 apt-get -y purge ppp pppconfig pppoeconf;
 
-echo "==> Removing other oddities"
-apt-get -y purge accountsservice bind9-host busybox-static command-not-found dmidecode \
-    dosfstools friendly-recovery hdparm info install-info installation-report \
-    iso-codes krb5-locales language-selector-common laptop-detect lshw mtr-tiny nano \
-    ncurses-term ntfs-3g os-prober parted pci.ids pciutils plymouth popularity-contest powermgmt-base \
-    publicsuffix python-apt-common shared-mime-info ssh-import-id \
-    tasksel tcpdump ufw usb.ids usbutils uuid-runtime xdg-user-dirs
+echo "remove packages we don't need"
+apt-get -y purge popularity-contest command-not-found friendly-recovery bash-completion laptop-detect motd-news-config usbutils grub-legacy-ec2
 
 # 22.04+ don't have this
 echo "remove the fonts-ubuntu-font-family-console"
@@ -70,6 +62,15 @@ echo "removing command-not-found-data"
 # 19.10+ don't have this package so fail gracefully
 apt-get -y purge command-not-found-data || true;
 
+# Exclude the files we don't need w/o uninstalling linux-firmware
+echo "Setup dpkg excludes for linux-firmware"
+cat <<_EOF_ | cat >> /etc/dpkg/dpkg.cfg.d/excludes
+#BENTO-BEGIN
+path-exclude=/lib/firmware/*
+path-exclude=/usr/share/doc/linux-firmware/*
+#BENTO-END
+_EOF_
+
 echo "delete the massive firmware files"
 rm -rf /lib/firmware/*
 rm -rf /usr/share/doc/linux-firmware/*
@@ -77,10 +78,6 @@ rm -rf /usr/share/doc/linux-firmware/*
 echo "autoremoving packages and cleaning apt data"
 apt-get -y autoremove;
 apt-get -y clean;
-
-# Clean up the apt cache
-apt-get -y autoremove --purge
-apt-get clean
 
 echo "remove /usr/share/doc/"
 rm -rf /usr/share/doc/*
