@@ -107,10 +107,6 @@ source "virtualbox-iso" "packer-vagrant-ubuntu-virtual-box" {
   ]
   virtualbox_version_file = ".vbox_version"
   vm_name                 = "packer-vagrant-ubuntu-${local.vboxversion}-amd64"
-
-  # vrdp_bind_address      = "0.0.0.0"
-  # vrdp_port_max          = 6000
-  # vrdp_port_min          = 5900  
 }
 
 build {
@@ -121,28 +117,30 @@ build {
     expect_disconnect = true
     scripts           = [
       "scripts/update.sh",
-      "scripts/vagrant.sh",
       "scripts/motd.sh",
+      "scripts/networking.sh",
+      "scripts/sudoers.sh",
+      "scripts/vagrant.sh",
       "scripts/cleanup.sh",
-      "scripts/init.sh"
+      "scripts/minimize.sh"
     ]
   }
 
-  # post-processors {
-  #   post-processor "vagrant" {
-  #     keep_input_artifact = false
-  #     compression_level   = 9
-  #     # provider_override = {
-  #     #   virtualbox = {
-  #     #     output = "target/${local.osdetails}.box"
-  #     #   }
-  #     # }
-  #   }
-  #   post-processor "vagrant-cloud" {
-  #     access_token        = "${var.vagrantcloud_token}"
-  #     box_tag             = "${var.box_tag}"
-  #     version             = "${local.vboxversion}-${local.version}"
-  #     version_description = "${local.version_desc}"
+  post-processors {
+    post-processor "vagrant" {
+      keep_input_artifact = false
+      compression_level   = 9
+      # provider_override = {
+      #   virtualbox = {
+      #     output = "target/${local.osdetails}.box"
       #   }
       # }
+    }
+    post-processor "vagrant-cloud" {
+      access_token        = "${var.vagrantcloud_token}"
+      box_tag             = "${var.box_tag}"
+      version             = "${local.vboxversion}-${local.version}"
+      version_description = "${local.version_desc}"
+    }
+  }
 }
