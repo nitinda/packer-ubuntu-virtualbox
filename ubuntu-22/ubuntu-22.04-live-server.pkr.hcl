@@ -9,39 +9,51 @@ variable "box_tag" {
   default = "nitindas/ubuntu-22"
 }
 
-variable "checksum" {
-  type    = string
-  default = "file:https://releases.ubuntu.com/jammy/SHA256SUMS"
-}
-
-variable "non_gui" {
-  type    = string
-  default = "false"
-}
-
 variable "vagrantcloud_token" {
   type    = string
   default = "${env("VAGRANT_CLOUD_TOKEN")}"
 }
 
-variable "output_directory" {
-  type    = string
-  default = "c:/vagrant-box"
-}
-
-locals { timestamp = regex_replace(timestamp(), "[- TZ:]", "") }
+# locals { timestamp = regex_replace(timestamp(), "[- TZ:]", "") }
 
 locals {
-  file         = "http://releases.ubuntu.com/22.04/ubuntu-${var.ServerBaseVersion}-live-server-amd64.iso"
-  osdetails    = "ubuntu-${local.vboxversion}-amd64"
-  vboxversion  = "${var.ServerBaseVersion}"
-  version      = "${local.timestamp}"
-  version_desc = "Latest kernel build of Ubuntu Vagrant images based on Ubuntu Server ${local.vboxversion} LTS (Jammy Jellyfish)"
+  timestamp                 = formatdate("YYYYMM.DD.0", timestamp())
+  guest_additions_path      = "VBoxGuestAdditions_{{ .Version }}.iso"
+  guest_additions_interface = "sata"
+  guest_os_type             = "Ubuntu_64"
+  virtualbox_version_file   = ".vbox_version"
+  headless                  = false
+  disk_size                 = 56320
+  memory                    = 2048
+  http_directory            = "subiquity/http"
+  iso_checksum              = "file:https://releases.ubuntu.com/jammy/SHA256SUMS"
+  iso_url                   = "https://releases.ubuntu.com/jammy/ubuntu-22.04.2-live-server-amd64.iso"
+  boot_wait                 = "10s"
+  osdetails                 = "ubuntu-${local.vboxversion}-amd64"
+  vboxversion               = var.ServerBaseVersion
+  version                   = local.timestamp
+  version_desc              = "Ubuntu 22.04 Vagrant box version ${local.timestamp}. Built with: virtualbox: {{ .Version }}, packer: '${packer.version}'"
+  shutdown_command          = "echo 'vagrant'|sudo -S shutdown -P now"
+  shutdown_timeout          = "15m"
+  ssh_timeout               = "60m"
+  ssh_password              = "vagrant"
+  ssh_username              = "vagrant"
+  vm_name                   = "${local.os_name}-${local.os_version}-amd64"
+  os_name                   = "ubuntu"
+  os_version                = "22.04"
+  os_arch                   = "x86_64"
+  output_directory          = "c:/vagrant-box"
+
+  vboxmanage = [
+    ["modifyvm", "{{.Name}}", "--memory", "4096"],
+    ["modifyvm", "{{.Name}}", "--cpus", "2"],
+    # ["modifyvm", "{{.Name}}", "--nat-localhostreachable1", "on"],
+    ["modifyvm", "{{.Name}}", "--audio", "none"],
+  ]
 }
 
 # could not parse template for following block: "template: hcl2_upgrade:2: bad character U+0060 '`'"
-
-source "virtualbox-iso" "packer-vagrant-ubuntu-virtual-box" {
+source "virtualbox-iso" "vm" {
   # boot_command = [
   #   "<wait>c<wait>set gfxpayload=keep<enter><wait>linux /casper/vmlinuz quiet autoinstall ds=nocloud-net\\;s=http://{{.HTTPIP}}:{{.HTTPPort}}/ ---<enter><wait>initrd /casper/initrd<wait><enter><wait>boot<enter><wait>"
   # ]
@@ -49,68 +61,37 @@ source "virtualbox-iso" "packer-vagrant-ubuntu-virtual-box" {
   boot_command = [
     "<wait>c<wait>",
     "set gfxpayload=keep<enter><wait>",
-    # "linux /casper/vmlinuz autoinstall quiet ds='nocloud-net;s=http://{{.HTTPIP}}:{{.HTTPPort}}/' ---<enter><wait>",
     "linux /casper/vmlinuz autoinstall ds='nocloud-net;s=http://{{.HTTPIP}}:{{.HTTPPort}}/' ---<enter><wait>",
     "initrd /casper/initrd<wait><enter><wait>",
     "boot<enter><wait>"
   ]
 
-  # boot_command = [
-  #   "<wait>c<wait>",
-  #   "set gfxpayload=keep<enter><wait>",
-  #   "linux /casper/vmlinuz <wait>",
-  #   "autoinstall quiet fsck.mode=skip <wait>",
-  #   "ipv6.disable=1 net.ifnames=0 biosdevname=0 systemd.unified_cgroup_hierarchy=0 ds='nocloud-net;s=http://{{.HTTPIP}}:{{.HTTPPort}}/' ---<enter><wait>",
-  #   "initrd /casper/initrd<wait><enter><wait>",
-  #   "boot<enter><wait>"
-  # ]
-
-  # boot_command = [
-  #   "<wait>c<wait>",
-  #   "set gfxpayload=keep<enter><wait>",
-  #   "linux /casper/vmlinuz --- autoinstall ds='nocloud-net;seedfrom=http://{{.HTTPIP}}:{{.HTTPPort}}/'<enter><wait>",
-  #   "initrd /casper/initrd<wait><enter><wait>",
-  #   "boot<enter>",
-  #   "<enter><f10><wait>"
-  # ]
-
-  # boot_command = [
-  #   "<wait>c<wait>",
-  #   "set gfxpayload=keep<enter><wait>",
-  #   "linux /casper/vmlinuz autoinstall ds='nocloud-net;seedfrom=http://{{.HTTPIP}}:{{.HTTPPort}}/' ---<enter><wait>",
-  #   "initrd /casper/initrd<wait><enter><wait>",
-  #   "boot<enter>",
-  #   "<enter><f10><wait>"
-  # ]
-
-  boot_wait               = "5s"
-  http_directory          = "subiquity/http"
-  guest_additions_path    = "VBoxGuestAdditions_{{.Version}}.iso"
-  guest_os_type           = "Ubuntu_64"
-  headless                = "${var.non_gui}"
-  iso_checksum            = "${var.checksum}"
-  iso_url                 = "${local.file}"
-  memory                  = 2048
-  disk_size               = 50000
-  output_directory        = "c:/vagrant-box"
-  shutdown_command        = "echo 'vagrant'|sudo -S shutdown -P now"
-  ssh_handshake_attempts  = "1000"
-  ssh_keep_alive_interval = "90s"
-  ssh_password            = "vagrant"
-  ssh_timeout             = "90m"
-  ssh_username            = "vagrant"
-  ssh_wait_timeout        = "15m"
-  vboxmanage              = [
-    ["modifyvm", "{{.Name}}", "--memory", "4096"],
-    ["modifyvm", "{{.Name}}", "--cpus", "2"],
-    ["modifyvm", "{{.Name}}", "--nat-localhostreachable1", "on"],
-  ]
-  virtualbox_version_file = ".vbox_version"
-  vm_name                 = "packer-vagrant-ubuntu-${local.vboxversion}-amd64"
+  boot_wait                 = local.boot_wait
+  http_directory            = local.http_directory
+  guest_additions_path      = local.guest_additions_path
+  guest_additions_interface = local.guest_additions_interface
+  guest_os_type             = local.guest_os_type
+  virtualbox_version_file   = local.virtualbox_version_file
+  headless                  = local.headless
+  iso_checksum              = local.iso_checksum
+  iso_url                   = local.iso_url
+  memory                    = local.memory
+  disk_size                 = local.disk_size
+  output_directory          = local.output_directory
+  shutdown_command          = local.shutdown_command
+  shutdown_timeout          = local.shutdown_timeout
+  ssh_handshake_attempts    = "1000"
+  ssh_keep_alive_interval   = "90s"
+  ssh_password              = local.ssh_password
+  ssh_timeout               = local.ssh_timeout
+  ssh_username              = local.ssh_username
+  ssh_wait_timeout          = "30m"
+  vm_name                   = local.vm_name
+  vboxmanage                = local.vboxmanage
 }
 
 build {
-  sources = ["source.virtualbox-iso.packer-vagrant-ubuntu-virtual-box"]
+  sources = ["source.virtualbox-iso.vm"]
 
   provisioner "shell" {
     execute_command   = "echo 'vagrant' | {{ .Vars }} sudo -S -E bash '{{ .Path }}'"
@@ -118,29 +99,29 @@ build {
     scripts           = [
       "scripts/update.sh",
       "scripts/motd.sh",
+      "scripts/sshd.sh",
       "scripts/networking.sh",
       "scripts/sudoers.sh",
       "scripts/vagrant.sh",
+      "scripts/systemd.sh",
+      "scripts/virtualbox.sh",
       "scripts/cleanup.sh",
-      "scripts/minimize.sh"
+      "scripts/minimize.sh",
     ]
   }
 
   post-processors {
     post-processor "vagrant" {
-      keep_input_artifact = false
+      keep_input_artifact = true
       compression_level   = 9
-      # provider_override = {
-      #   virtualbox = {
-      #     output = "target/${local.osdetails}.box"
-      #   }
-      # }
+      provider_override   = "virtualbox"
+      output               = "${path.root}/../builds/${local.os_name}-${local.os_version}-${local.os_arch}.{{ .Provider }}.box"
     }
-    post-processor "vagrant-cloud" {
-      access_token        = "${var.vagrantcloud_token}"
-      box_tag             = "${var.box_tag}"
-      version             = "${local.vboxversion}-${local.version}"
-      version_description = "${local.version_desc}"
-    }
+    # post-processor "vagrant-cloud" {
+    #   access_token        = "${var.vagrantcloud_token}"
+    #   box_tag             = "${var.box_tag}"
+    #   version             = "${local.vboxversion}-${local.version}"
+    #   version_description = "${local.version_desc}"
+    # }
   }
 }
