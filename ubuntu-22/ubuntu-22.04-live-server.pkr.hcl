@@ -47,16 +47,13 @@ locals {
   vboxmanage = [
     ["modifyvm", "{{.Name}}", "--memory", "4096"],
     ["modifyvm", "{{.Name}}", "--cpus", "2"],
-    # ["modifyvm", "{{.Name}}", "--nat-localhostreachable1", "on"],
+    ["modifyvm", "{{.Name}}", "--nat-localhostreachable1", "on"],
     ["modifyvm", "{{.Name}}", "--audio", "none"],
   ]
 }
 
 # could not parse template for following block: "template: hcl2_upgrade:2: bad character U+0060 '`'"
-source "virtualbox-iso" "vm" {
-  # boot_command = [
-  #   "<wait>c<wait>set gfxpayload=keep<enter><wait>linux /casper/vmlinuz quiet autoinstall ds=nocloud-net\\;s=http://{{.HTTPIP}}:{{.HTTPPort}}/ ---<enter><wait>initrd /casper/initrd<wait><enter><wait>boot<enter><wait>"
-  # ]
+source "virtualbox-iso" "virtualbox" {
 
   boot_command = [
     "<wait>c<wait>",
@@ -91,7 +88,7 @@ source "virtualbox-iso" "vm" {
 }
 
 build {
-  sources = ["source.virtualbox-iso.vm"]
+  sources = ["source.virtualbox-iso.virtualbox"]
 
   provisioner "shell" {
     execute_command   = "echo 'vagrant' | {{ .Vars }} sudo -S -E bash '{{ .Path }}'"
@@ -115,13 +112,13 @@ build {
       keep_input_artifact = true
       compression_level   = 9
       provider_override   = "virtualbox"
-      output               = "${path.root}/../builds/${local.os_name}-${local.os_version}-${local.os_arch}.{{ .Provider }}.box"
+      output               = "${path.root}/../builds/${local.os_name}-${local.os_version}-${local.os_arch}.{{ .Provider }}.vbox"
     }
-    # post-processor "vagrant-cloud" {
-    #   access_token        = "${var.vagrantcloud_token}"
-    #   box_tag             = "${var.box_tag}"
-    #   version             = "${local.vboxversion}-${local.version}"
-    #   version_description = "${local.version_desc}"
-    # }
+    post-processor "vagrant-cloud" {
+      access_token        = "${var.vagrantcloud_token}"
+      box_tag             = "${var.box_tag}"
+      version             = "${local.vboxversion}-${local.version}"
+      version_description = "${local.version_desc}"
+    }
   }
 }
