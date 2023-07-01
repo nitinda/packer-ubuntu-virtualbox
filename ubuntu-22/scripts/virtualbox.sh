@@ -26,14 +26,15 @@ virtualbox-iso|virtualbox-ovf)
 
     echo "installing the vbox additions"
     # this install script fails with non-zero exit codes for no apparent reason so we need better ways to know if it worked
-    /tmp/vbox/VBoxLinuxAdditions.run --nox11 || true
+    # /tmp/vbox/VBoxLinuxAdditions.run --nox11 || true
+    /tmp/vbox/VBoxLinuxAdditions.run || true
 
     if ! modinfo vboxsf >/dev/null 2>&1; then
          echo "Cannot find vbox kernel module. Installation of guest additions unsuccessful!"
          exit 1
     fi
 
-    echo "unmounting and removing the vbox ISO"
+    # echo "unmounting and removing the vbox ISO"
     umount /tmp/vbox;
     rm -rf /tmp/vbox;
     rm -f "$HOME_DIR"/*.iso;
@@ -44,6 +45,7 @@ virtualbox-iso|virtualbox-ovf)
     elif [ -f "/bin/yum" ] || [ -f "/usr/bin/yum" ]; then
         yum remove -y gcc cpp kernel-headers kernel-devel kernel-uek-devel
     elif [ -f "/usr/bin/apt-get" ]; then
+        echo "Removing build-essential gcc g++ make libc6-dev dkms linux-headers-$(uname -r)"
         apt-get remove -y build-essential gcc g++ make libc6-dev dkms linux-headers-"$(uname -r)"
     elif [ -f "/usr/bin/zypper" ]; then
         zypper -n rm -u kernel-default-devel gcc make
