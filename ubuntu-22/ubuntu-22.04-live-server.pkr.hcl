@@ -14,6 +14,24 @@ variable "vagrantcloud_token" {
   default = "${env("VAGRANT_CLOUD_TOKEN")}"
 }
 
+variable "os_name" {
+  type        = string
+  description = "OS Brand Name"
+  default     = "ubuntu"
+}
+
+variable "os_version" {
+  type        = string
+  description = "OS version number"
+  default     = "22.04"
+}
+
+variable "os_arch" {
+  type        = string
+  description = "OS architecture type, x86_64 or aarch64"
+  default     = "x86_64"
+}
+
 # locals { timestamp = regex_replace(timestamp(), "[- TZ:]", "") }
 
 locals {
@@ -32,16 +50,14 @@ locals {
   osdetails                 = "ubuntu-${local.vboxversion}-amd64"
   vboxversion               = var.ServerBaseVersion
   version                   = local.timestamp
-  version_desc              = "Ubuntu 22.04 Vagrant box version ${local.timestamp}. Built with: virtualbox: {{ .Version }}, packer: '${packer.version}'"
+  virtualbox_version        = "7.0.6"
+  version_desc              = "Ubuntu 22.04 Vagrant box version ${local.timestamp}. Built with: virtualbox: ${local.virtualbox_version}, packer: '${packer.version}'"
   shutdown_command          = "echo 'vagrant'|sudo -S shutdown -P now"
   shutdown_timeout          = "15m"
   ssh_timeout               = "60m"
   ssh_password              = "vagrant"
   ssh_username              = "vagrant"
-  vm_name                   = "${local.os_name}-${local.os_version}-amd64"
-  os_name                   = "ubuntu"
-  os_version                = "22.04"
-  os_arch                   = "x86_64"
+  vm_name                   = "${var.os_name}-${var.os_version}-amd64"
   output_directory          = "c:/vagrant-box"
 
   vboxmanage = [
@@ -112,7 +128,7 @@ build {
       keep_input_artifact = true
       compression_level   = 9
       provider_override   = "virtualbox"
-      output               = "${path.root}/../builds/${local.os_name}-${local.os_version}-${local.os_arch}.{{ .Provider }}.vbox"
+      output               = "${path.root}/../builds/${var.os_name}-${var.os_version}-${var.os_arch}.{{ .Provider }}.box"
     }
     post-processor "vagrant-cloud" {
       access_token        = "${var.vagrantcloud_token}"
