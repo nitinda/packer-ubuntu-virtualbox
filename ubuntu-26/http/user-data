@@ -1,0 +1,50 @@
+#cloud-config
+autoinstall:
+  version: 1
+
+  # ── Locale & keyboard ────────────────────────
+  locale: en_US.UTF-8
+  keyboard:
+    layout: us
+    variant: ""
+
+  # ── Network (DHCP on first NIC) ──────────────
+  network:
+    version: 2
+    ethernets:
+      enp0s3:
+        dhcp4: true
+
+  # ── Storage (entire first disk, LVM) ─────────
+  storage:
+    layout:
+      name: lvm
+
+  # ── Identity ─────────────────────────────────
+  identity:
+    hostname: ubuntu-2604
+    username: ubuntu
+    # Password: ubuntu  (SHA-512 hash — change before production use!)
+    password: "$6$packerubuntu$T7kRZFjr813QfDTdmo9SxUlbjSMVFqZ7Z9Zxyum8Yl9u25jF3qt4QYZ3htryHTSRNiVR.dbzmfI5WbhYEvX6k."
+
+  # ── SSH ──────────────────────────────────────
+  ssh:
+    install-server: true
+    allow-pw: true
+
+  # ── Packages installed during setup ──────────
+  packages:
+    - openssh-server
+    - curl
+    - wget
+    - vim
+
+  # ── Late commands ────────────────────────────
+  late-commands:
+    # Passwordless sudo — Packer SSH provisioner requires this
+    - echo 'ubuntu ALL=(ALL) NOPASSWD:ALL' > /target/etc/sudoers.d/ubuntu
+    - chmod 440 /target/etc/sudoers.d/ubuntu
+    # Disable resolved stub to avoid DNS conflicts
+    - "sed -i 's/#DNSStubListener=yes/DNSStubListener=no/' /target/etc/systemd/resolved.conf || true"
+    # Ensure SSH starts on boot
+    - curtin in-target --target=/target -- systemctl enable ssh

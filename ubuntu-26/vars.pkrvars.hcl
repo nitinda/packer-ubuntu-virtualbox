@@ -1,0 +1,4 @@
+cpus        = 4
+memory      = 8192
+disk_size   = 81920
+ssh_password = "c35daf02fe116c1c978aac3316d4f047f3d0d4610923c5cd1769a51f527320ad9df2615164305fea6d41bf8e22023a6e537d248aa3f920fce931b542a954a9d5"
